@@ -1,33 +1,32 @@
 ---
 - name: Get all hosts from vCenter
   hosts: localhost
-  gather_facts: false
-  ignore_errors: false
-  collections: community.vmware
-  
+  gather_facts: true
+  collections:
+    - vmware.vmware_rest
+    - community.vmware
   vars:
-    - vcenter_hostname: "192.168.1.200"
-    - vcenter_username: "administrator@vsphere.local"
-    - vcenter_password: 'Password!1'
-    - datacenter_name: "Datacenter"
-    - ansible_python_interpreter: "/usr/bin/python3.8"
-      esxi_hosts:
-      - 192.168.30.5
-      #- 192.168.30.5
-      # Add more hosts as needed
-   # - cluster_name: "405-Cluster"
+    - vcenter_hostname: ""
+    - vcenter_username: ""
+    - vcenter_password: ""
+    - vcenter_validate_certs: false
   tasks:
-
-    - name: Gather vmware host facts
-      community.vmware.vmware_host_facts:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        esxi_hostname: "{{ item }}"
-        validate_certs: false
-      loop: "{{ esxi_hosts }}"
-      register: host_facts
-
+    - name: Get a list of the hosts
+      vmware.vmware_rest.vcenter_host_info:
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        vcenter_username: "{{ vcenter_username }}"
+        vcenter_password: "{{ vcenter_password }}"
+        vcenter_validate_certs: "{{ vcenter_validate_certs }}"
+      register: vmware_hosts
+      
+    - name: Extract hostnames
+      ansible.builtin.set_fact:
+        esxi_hosts: "{{ vmware_hosts.value | map(attribute='name') | list }}"
+    
+    - name: Print all ESXi hosts
+      ansible.builtin.debug:
+        msg: "{{ esxi_hosts }}"
+    
     - name: Enable SSH on ESXi hosts
       community.vmware.vmware_host_service_manager:
         hostname: "{{ vcenter_hostname }}"
@@ -39,60 +38,3 @@
         service_policy: "automatic"
         validate_certs: false
       loop: "{{ esxi_hosts }}"
-      
-    
-    # - name: Enable necessary repositories
-    #   ansible.builtin.shell:
-    #     cmd: |
-    #       # Install-Module -Name vmware.powercli -force
-    #       # Define Variables
-    #       $Username = "{{ vcenter_username }}"
-    #       $Password = "{{ vcenter_password }}" | ConvertTo-SecureString -AsPlainText -Force
-    #       $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
-    #       Set-PowerCLIConfiguration -Scope AllUSers -ParticipateInCEIP $false -Confirm:$False | out-null
-    #       Set-PowerCLIConfiguration -Scope AllUsers -InvalidCertificateAction:Ignore -Confirm:$False  | out-null     
-    #       Set-PowerCLIConfiguration -Scope AllUsers -DefaultVIServerMode multiple -Confirm:$false 
-
-    #       Connect-VIServer "{{ vcenter_hostname }}" -Credential $Credential | out-null
-    #       # Get Windows vms that are powered on and store in var
-    #       get-vm 
-    #     executable: pwsh
-    #   register: email_output
-
-
-
-    # - name: Gather vmware cluster facts
-    #   community.vmware.vmware_cluster_info:
-    #     hostname: "{{ vcenter_hostname }}"
-    #     username: "{{ vcenter_username }}"
-    #     password: "{{ vcenter_password }}"
-    #     validate_certs: no
-    #  #   cluster_name: "{{ cluster_name }}"
-    #     datacenter: "{{ datacenter_name }}"
-    #     schema: "summary"
-    #   register: cluster_facts
-
-    # - name: Gather vmware host facts
-    #   vmware_host_facts:
-    #     hostname: "{{ vcenter_hostname }}"
-    #     username: "{{ vcenter_username }}"
-    #     password: "{{ vcenter_password }}"
-    #     validate_certs: no
-    #     esxi_hostname: "192.168.30.5" #"{{ item }}"
-    #   #loop: "{{ cluster_facts.clusters[cluster_name].hosts }}"
-    #   register: host_facts
-
-    # - name: Print host facts
-    #   debug:
-    #     var: host_facts.results
-# Install-Module -Name vmware.powercli -force
-# Set-PowerCLIConfiguration -Scope AllUSers -ParticipateInCEIP $false -Confirm:$False | out-null
-# Set-PowerCLIConfiguration -Scope AllUsers -InvalidCertificateAction:Ignore -Confirm:$False  | out-null     
-# Set-PowerCLIConfiguration -Scope AllUsers -DefaultVIServerMode multiple -Confirm:$false | out-null
-# #Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -WarningAction SilentlyContinue -confirm:$false -Scope AllUSers
-# $Username = "administrator@vsphere.local"
-# $Password = 'Password!1' | ConvertTo-SecureString -AsPlainText -Force            
-# $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
-# Connect-VIServer '192.168.1.200'  -Credential $Credential   
-# Get-VM
-# Disconnect-VIServer * -Confirm:$false
