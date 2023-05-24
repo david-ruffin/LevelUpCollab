@@ -16,8 +16,14 @@
       # Add more hosts as needed
    # - cluster_name: "405-Cluster"
   tasks:
+    - name: Install pip
+      raw: sudo yum install -y python3-pip
+    - name: Install setuptools
+      command: /usr/libexec/platform-python -m ensurepip --upgrade
+
     - name: Install requests
-      command: /usr/bin/python3.9 -m pip install requests
+      command: /usr/libexec/platform-python -m pip install requests
+
     - name: Gather vmware host facts
       community.vmware.vmware_host_facts:
         hostname: "{{ vcenter_hostname }}"
