@@ -4,12 +4,13 @@
   gather_facts: false
   ignore_errors: false
   collections: community.vmware
-
+  
   vars:
     - vcenter_hostname: "192.168.1.200"
     - vcenter_username: "administrator@vsphere.local"
     - vcenter_password: 'Password!1'
     - datacenter_name: "Datacenter"
+    - ansible_python_interpreter: /usr/bin/python3.9
       esxi_hosts:
       - 192.168.30.5
       #- 192.168.30.5
