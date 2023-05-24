@@ -1,8 +1,8 @@
 ---
 - name: Get all hosts from vCenter
   hosts: localhost
-  gather_facts: true
-  ignore_errors: true
+  gather_facts: false
+  ignore_errors: false
   vars:
     - vcenter_hostname: "192.168.1.200"
     - vcenter_username: "administrator@vsphere.local"
