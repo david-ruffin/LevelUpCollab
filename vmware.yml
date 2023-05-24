@@ -3,6 +3,8 @@
   hosts: localhost
   gather_facts: false
   ignore_errors: false
+  collections:
+    - vmware.vmware_rest
   vars:
     - vcenter_hostname: "192.168.1.200"
     - vcenter_username: "administrator@vsphere.local"
