@@ -9,8 +9,8 @@
     - vcenter_password: 'Password!1'
     - datacenter_name: "Datacenter"
       esxi_hosts:
-      - 192.168.30.4
       - 192.168.30.5
+      #- 192.168.30.5
       # Add more hosts as needed
    # - cluster_name: "405-Cluster"
   tasks:
