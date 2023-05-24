@@ -2,7 +2,7 @@
 - name: Get all hosts from vCenter
   hosts: localhost
   gather_facts: false
-  ignore_errors: true
+  ignore_errors: false
   collections: community.vmware
 
   vars:
